@@ -1,0 +1,46 @@
+{
+  "name": "@snyk/go-semver",
+  "description": "node-semver compatible API with Go modules dependencies semantics",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write '{lib,test}/**/*.ts' && eslint --fix lib/**/*.ts && (cd test && eslint **/*.ts)",
+    "lint": "prettier --check '{lib,test}/**/*.ts' && eslint lib/**/*.ts && (cd test && eslint **/*.ts)",
+    "prepare": "npm run build && npm run snyk-protect",
+    "snyk-protect": "snyk protect",
+    "test": "npm run lint && npm run test:unit",
+    "test:coverage": "npm run test:unit -- --coverage",
+    "test:watch": "tsc-watch --onSuccess 'npm run test:unit'",
+    "test:unit": "jest"
+  },
+  "author": "Snyk <https://snyk.io>",
+  "license": "private",
+  "private": true,
+  "dependencies": {
+    "@types/lodash": "^4.14.149",
+    "@types/node": "^13.7.4",
+    "@types/source-map-support": "^0.5.0",
+    "lodash": "^4.17.15",
+    "source-map-support": "^0.5.16",
+    "tslib": "^1.10.0",
+    "typescript": "^3.7.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.9.1",
+    "@typescript-eslint/eslint-plugin": "^2.8.0",
+    "@typescript-eslint/parser": "^2.8.0",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.5.0",
+    "jest": "^24.9.0",
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.1.0",
+    "tsc-watch": "^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/snyk/go-semver.git"
+  },
+  "engines": {
+    "node": ">=10"
+  }
+}
