@@ -3,16 +3,8 @@ version: 2.1
 defaults: &defaults
   resource_class: small
   docker:
-    - image: gcr.io/snyk-main/nsolid-cicd:dubnium-3.6.0
-      auth:
-        username: _json_key
-        password: $GCLOUD_GCR_BUILDER
-  working_directory: ~/go-semver
-
-private_cicd_repo_auth: &private_cicd_repo_auth
-  auth:
-    username: _json_key
-    password: $GCLOUD_GCR_BUILDER
+    - image: node:10
+  working_directory: ~/snyk-go-semver
 
 commands:
   install_deps:
@@ -21,31 +13,39 @@ commands:
       - checkout
       - restore_cache:
           keys:
-            - v1-go-semver-npm-cache-{{ checksum "package-lock.json" }}
-            - v1-go-semver-npm-cache-
+            - v1-npm-cache-{{ checksum "package-lock.json" }}
+            - v1-npm-cache-
       - run:
           name: Use snyk-main npmjs user
           command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
       - run:
           name: Install dependencies
-          command: npm ci
+          command: npm install
       - save_cache:
-          key: v1-go-semver-npm-cache-{{ checksum "package-lock.json" }}
+          key: v1-npm-cache-{{ checksum "package-lock.json" }}
           paths:
             - ~/.npm
       - persist_to_workspace:
           root: .
           paths:
             - node_modules/
+  checkout_and_merge:
+    steps:
+      - checkout
+      - run:
+          name: Checkout master
+          command: git checkout origin/master
+      - run:
+          name: Merge test branch
+          command: |
+            git config user.name "CircleCI"
+            git config user.email "noop"
+            git merge --no-edit "$CIRCLE_BRANCH"
+      - attach_workspace:
+          at: ~/snyk-go-semver
 
 jobs:
-  install_dev:
-    <<: *defaults
-    environment:
-      NODE_ENV: development
-    steps:
-      - install_deps
-  install_prod:
+  install:
     <<: *defaults
     steps:
       - install_deps
@@ -54,38 +54,59 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/go-semver
+          at: ~/snyk-go-semver
       - run:
-          name: Run lint
+          name: Run tests
           command: npm run lint
   test:
     <<: *defaults
     docker:
-    - image: gcr.io/snyk-main/nsolid-cicd:dubnium-3.6.0
-      auth:
-        username: _json_key
-        password: $GCLOUD_GCR_BUILDER
+      - image: circleci/node:10
     steps:
       - checkout
+      - setup_remote_docker
       - attach_workspace:
-          at: ~/go-semver
+          at: ~/snyk-go-semver
       - run:
           name: Run tests
           command: npm test
-  release:
+  build:
     <<: *defaults
     steps:
-      - checkout
+      - checkout_and_merge
+      - run:
+          name: Use snyk-main npmjs user
+          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
+      - run:
+          name: Install dependencies
+          command: npm install
+      - run:
+          name: Run tests
+          command: npm run build
+  release:
+    <<: *defaults
+    docker:
+      - image: node:10
+    steps:
+      - checkout_and_merge
+      - run:
+          name: Use snyk-main npmjs user
+          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
+      - run:
+          name: Install dependencies
+          command: npm install
+      - run:
+          name: Build
+          command: npm run build
       - run:
           name: Release on GitHub
           command: npx semantic-release
-
 workflows:
   version: 2
   test_and_release:
     jobs:
-      - install_dev:
-          name: Install DEV
+      - install:
+          name: Install
           context: nodejs-install
           filters:
             branches:
@@ -95,7 +116,15 @@ workflows:
           name: Lint
           context: nodejs-install
           requires:
-            - Install DEV
+            - Install
+          filters:
+            branches:
+              ignore:
+                - master
+      - build:
+          name: Build
+          requires:
+            - Install
           filters:
             branches:
               ignore:
@@ -104,26 +133,14 @@ workflows:
           name: Test
           context: nodejs-install
           requires:
-            - Install DEV
-          filters:
-            branches:
-              ignore:
-                - master
-      - install_prod:
-          name: Install PROD
-          context: nodejs-install
-          requires:
-            - Test
-            - Lint
+            - Install
           filters:
             branches:
               ignore:
                 - master
       - release:
           name: Release to GitHub
-          context: nodejs-app-release
-          requires:
-            - Install PROD
+          context: nodejs-lib-release
           filters:
             branches:
               only:

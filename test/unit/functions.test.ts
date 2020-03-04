@@ -8,7 +8,7 @@ import {
 } from '../../lib/functions';
 
 describe('test all functions on valid versions', () => {
-  for (const [ version, vMajor, vMinor, vPatch, vPrerelease ] of [
+  for (const [version, vMajor, vMinor, vPatch, vPrerelease] of [
     ['v0.0.0', '0', '0', '0', ''],
     ['v1.0.0', '1', '0', '0', ''],
     ['v1.0.1', '1', '0', '1', ''],
@@ -35,13 +35,55 @@ describe('test all functions on valid versions', () => {
     ['v1.1.0+build', '1', '1', '0', ''],
     ['v1.1.0+incompatible', '1', '1', '0', ''],
     ['v1.1.0-alpha+build', '1', '1', '0', 'alpha'],
-    ['v0.0.0-20200221101010-abcdabcd', '0', '0', '0', '20200221101010-abcdabcd'],
-    ['v0.0.0-20200221101010-abcdabcd+incompatible', '0', '0', '0', '20200221101010-abcdabcd'],
-    ['v1.0.0-20200221101010-abcdabcd', '1', '0', '0', '20200221101010-abcdabcd'],
-    ['v1.0.0-20200221101010-abcdabcd+incompatible', '1', '0', '0', '20200221101010-abcdabcd'],
-    ['v1.0.0-20200229202020-abcd1234', '1', '0', '0', '20200229202020-abcd1234'],
-    ['v1.0.1-20200221101010-abcdabcd', '1', '0', '1', '20200221101010-abcdabcd'],
-    ['v2.0.0-20200221101010-abcdabcd', '2', '0', '0', '20200221101010-abcdabcd'],
+    [
+      'v0.0.0-20200221101010-abcdabcd',
+      '0',
+      '0',
+      '0',
+      '20200221101010-abcdabcd',
+    ],
+    [
+      'v0.0.0-20200221101010-abcdabcd+incompatible',
+      '0',
+      '0',
+      '0',
+      '20200221101010-abcdabcd',
+    ],
+    [
+      'v1.0.0-20200221101010-abcdabcd',
+      '1',
+      '0',
+      '0',
+      '20200221101010-abcdabcd',
+    ],
+    [
+      'v1.0.0-20200221101010-abcdabcd+incompatible',
+      '1',
+      '0',
+      '0',
+      '20200221101010-abcdabcd',
+    ],
+    [
+      'v1.0.0-20200229202020-abcd1234',
+      '1',
+      '0',
+      '0',
+      '20200229202020-abcd1234',
+    ],
+    [
+      'v1.0.1-20200221101010-abcdabcd',
+      '1',
+      '0',
+      '1',
+      '20200221101010-abcdabcd',
+    ],
+    [
+      'v2.0.0-20200221101010-abcdabcd',
+      '2',
+      '0',
+      '0',
+      '20200221101010-abcdabcd',
+    ],
   ]) {
     test(`test all functions on version "${version}"`, () => {
       expect(valid(version)).toBe(true);
