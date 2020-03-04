@@ -14,8 +14,7 @@
     "test:unit": "jest"
   },
   "author": "Snyk <https://snyk.io>",
-  "license": "private",
-  "private": true,
+  "license": "Apache-2.0",
   "dependencies": {
     "@types/lodash": "^4.14.149",
     "@types/node": "^13.7.4",
