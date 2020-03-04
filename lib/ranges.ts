@@ -1,5 +1,5 @@
 import { parse } from './go/semver';
-import { valid } from './functions'
+import { valid } from './functions';
 import { compare, eq } from './comparison';
 
 interface VersionRange {
@@ -49,11 +49,12 @@ function _parseParenthesisMatch(
     ver2 = ver1;
   }
   if (
-    ver1 && ver2 &&
+    ver1 &&
+    ver2 &&
     !(openParen === '[' && closeParen === ']') &&
     eq(ver1, ver2)
   ) {
-    throw new Error('Invalid version range')
+    throw new Error('Invalid version range');
   }
   return {
     startVersion: ver1 || undefined,
