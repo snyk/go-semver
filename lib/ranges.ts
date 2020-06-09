@@ -22,7 +22,7 @@ function _parseSingleVersionRange(part: string): VersionRange {
 }
 
 function _parseBetweenParenthesis(between: string): VersionRange[] {
-  const parts = between.split(/\s+|\s*,\s*/);
+  const parts = between.split(',').map((s) => s.trim());
   if (parts[0] || parts[parts.length - 1]) {
     throw new Error('Invalid version range');
   }
@@ -43,7 +43,7 @@ function _parseParenthesisMatch(
     throw new Error('Invalid version specifier in range');
   }
   if (!ver1 && !ver2) {
-    throw new Error('Invalid version specifier in range');
+    throw new Error('Version range parentheses must include start and/or end');
   }
   if (!comma) {
     ver2 = ver1;
