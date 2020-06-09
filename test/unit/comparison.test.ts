@@ -1,14 +1,4 @@
-import {
-  compare,
-  rcompare,
-  gt,
-  gte,
-  lt,
-  lte,
-  eq,
-  neq,
-  cmp,
-} from '../../lib/comparison';
+import { compare, rcompare, gt, gte, lt, lte, eq, neq, cmp } from '../../lib';
 
 // compare(v1, v2): Return 0 if v1 == v2, or 1 if v1 is greater, or -1 if v2 is
 // greater. Sorts in ascending order if passed to Array.sort().

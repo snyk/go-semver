@@ -1,11 +1,4 @@
-import {
-  valid,
-  major,
-  minor,
-  patch,
-  prerelease,
-  inc,
-} from '../../lib/functions';
+import { valid, major, minor, patch, prerelease, inc } from '../../lib';
 
 describe('test all functions on valid versions', () => {
   for (const [version, vMajor, vMinor, vPatch, vPrerelease] of [

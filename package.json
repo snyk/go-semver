@@ -1,7 +1,8 @@
 {
   "name": "@snyk/go-semver",
   "description": "node-semver compatible API with Go modules dependencies semantics",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write '{lib,test}/**/*.ts' && eslint --fix lib/**/*.ts && (cd test && eslint **/*.ts)",

@@ -1,4 +1,4 @@
-import { intersects, satisfies, validRange } from '../../lib/ranges';
+import { intersects, satisfies, validRange } from '../../lib';
 
 describe('test valid ranges', () => {
   for (const { range, included, excluded } of [
