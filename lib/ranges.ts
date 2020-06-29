@@ -14,12 +14,12 @@ interface VersionRange {
 
 const DEFAULT_REQUIREMENT: VersionRange[] = [
   { startVersion: 'v0.0.0', isStartInclusive: true, isEndInclusive: false },
-]
+];
 
 type Op = '>=' | '<=' | '>' | '<' | '=';
 const OPS = ['>=', '<=', '>', '<', '='];
 
-function parsePart(part: string): ({ op: Op, version: string }) {
+function parsePart(part: string): { op: Op; version: string } {
   const OPS_RE = OPS.map((op) => _.escapeRegExp(op)).join('|');
   const match = part.trim().match(`^(${OPS_RE})?(.*)$`);
   if (!match) {
@@ -36,7 +36,7 @@ function parsePart(part: string): ({ op: Op, version: string }) {
 }
 
 function parseRange(rangeStr: string): VersionRange {
-  let parts: Array<{ op: Op, version: string }>;
+  let parts: Array<{ op: Op; version: string }>;
   try {
     parts = rangeStr.split(',').map(parsePart);
   } catch (error) {
@@ -47,7 +47,10 @@ function parseRange(rangeStr: string): VersionRange {
   }
 
   const range = {} as VersionRange;
-  function setInclusive(attr: 'isStartInclusive' | 'isEndInclusive', value: boolean) {
+  function setInclusive(
+    attr: 'isStartInclusive' | 'isEndInclusive',
+    value: boolean,
+  ) {
     if (range.hasOwnProperty(attr)) {
       throw new InvalidRequirementPart();
     }
@@ -67,7 +70,10 @@ function parseRange(rangeStr: string): VersionRange {
       setInclusive('isEndInclusive', true);
     } else {
       setVersion(op[0] === '>' ? 'startVersion' : 'endVersion', version);
-      setInclusive(op[0] === '>' ? 'isStartInclusive' : 'isEndInclusive', op.endsWith('='));
+      setInclusive(
+        op[0] === '>' ? 'isStartInclusive' : 'isEndInclusive',
+        op.endsWith('='),
+      );
     }
   }
 
@@ -75,7 +81,7 @@ function parseRange(rangeStr: string): VersionRange {
     const comp = compare(range.startVersion, range.endVersion);
     if (
       comp === 1 ||
-      comp === 0 && !(range.isStartInclusive && range.isEndInclusive)
+      (comp === 0 && !(range.isStartInclusive && range.isEndInclusive))
     ) {
       throw new InvalidRequirementPart();
     }
@@ -105,7 +111,9 @@ export function validRange(range: string): string | null {
           return '=' + range.startVersion;
         }
         if (range.startVersion) {
-          parts.push((range.isStartInclusive ? '>=' : '>') + range.startVersion);
+          parts.push(
+            (range.isStartInclusive ? '>=' : '>') + range.startVersion,
+          );
         }
         if (range.endVersion) {
           parts.push((range.isEndInclusive ? '<=' : '<') + range.endVersion);

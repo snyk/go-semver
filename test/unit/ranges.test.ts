@@ -48,7 +48,8 @@ describe('test valid ranges', () => {
       excluded: ['v2.0.0-rc', 'v2.0.0'],
     },
     {
-      range: '>=v1.0.0-20201219133700-deadbeef, <=v1.0.0-20201219133702-deadbeef',
+      range:
+        '>=v1.0.0-20201219133700-deadbeef, <=v1.0.0-20201219133702-deadbeef',
       included: [
         'v1.0.0-20201219133700-deadbeef',
         'v1.0.0-20201219133701-deadbeef',
