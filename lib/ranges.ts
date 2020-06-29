@@ -1,6 +1,9 @@
-import { parse } from './go/semver';
-import { valid } from './functions';
-import { compare, eq } from './comparison';
+import * as _ from 'lodash';
+import { isValid, parse } from './go/semver';
+import { compare } from './comparison';
+
+class InvalidRequirementPart extends Error {}
+class InvalidVersionRange extends Error {}
 
 interface VersionRange {
   startVersion?: string;
@@ -9,105 +12,107 @@ interface VersionRange {
   isEndInclusive: boolean;
 }
 
-function _parseSingleVersionRange(part: string): VersionRange {
-  if (!valid(part)) {
-    throw new Error('Invalid version specifier in range');
+const DEFAULT_REQUIREMENT: VersionRange[] = [
+  { startVersion: 'v0.0.0', isStartInclusive: true, isEndInclusive: false },
+]
+
+type Op = '>=' | '<=' | '>' | '<' | '=';
+const OPS = ['>=', '<=', '>', '<', '='];
+
+function parsePart(part: string): ({ op: Op, version: string }) {
+  const OPS_RE = OPS.map((op) => _.escapeRegExp(op)).join('|');
+  const match = part.trim().match(`^(${OPS_RE})?(.*)$`);
+  if (!match) {
+    throw new InvalidRequirementPart();
   }
-  return {
-    startVersion: part,
-    endVersion: part,
-    isStartInclusive: true,
-    isEndInclusive: true,
-  } as VersionRange;
+
+  const op: Op = (match[1] || '=') as Op;
+  const version = match[2].trim();
+  if (!isValid(version)) {
+    throw new InvalidRequirementPart();
+  }
+
+  return { op, version };
 }
 
-function _parseBetweenParenthesis(between: string): VersionRange[] {
-  const parts = between.split(/\s+|\s*,\s*/);
-  if (parts[0] || parts[parts.length - 1]) {
-    throw new Error('Invalid version range');
+function parseRange(rangeStr: string): VersionRange {
+  let parts: Array<{ op: Op, version: string }>;
+  try {
+    parts = rangeStr.split(',').map(parsePart);
+  } catch (error) {
+    if (error instanceof InvalidRequirementPart) {
+      throw new InvalidVersionRange();
+    }
+    throw error;
   }
 
-  // If there is more than a single comma, anything between two commas
-  // should be a valid version specifier, indicating a single version.
-  return parts.slice(1, -1).map(_parseSingleVersionRange);
+  const range = {} as VersionRange;
+  function setInclusive(attr: 'isStartInclusive' | 'isEndInclusive', value: boolean) {
+    if (range.hasOwnProperty(attr)) {
+      throw new InvalidRequirementPart();
+    }
+    range[attr] = value;
+  }
+  function setVersion(attr: 'startVersion' | 'endVersion', value: string) {
+    if (range.hasOwnProperty(attr)) {
+      throw new InvalidRequirementPart();
+    }
+    range[attr] = value;
+  }
+  for (const { op, version } of parts) {
+    if (op === '=') {
+      setVersion('startVersion', version);
+      setInclusive('isStartInclusive', true);
+      setVersion('endVersion', version);
+      setInclusive('isEndInclusive', true);
+    } else {
+      setVersion(op[0] === '>' ? 'startVersion' : 'endVersion', version);
+      setInclusive(op[0] === '>' ? 'isStartInclusive' : 'isEndInclusive', op.endsWith('='));
+    }
+  }
+
+  if (range.startVersion && range.endVersion) {
+    const comp = compare(range.startVersion, range.endVersion);
+    if (
+      comp === 1 ||
+      comp === 0 && !(range.isStartInclusive && range.isEndInclusive)
+    ) {
+      throw new InvalidRequirementPart();
+    }
+  }
+
+  return range;
 }
 
-function _parseParenthesisMatch(
-  openParen: string,
-  ver1: string,
-  comma: string | undefined,
-  ver2: string | undefined,
-  closeParen: string,
-): VersionRange {
-  if ((ver1 && !valid(ver1)) || (ver2 && !valid(ver2))) {
-    throw new Error('Invalid version specifier in range');
+function parseRequirement(requirementStr: string): VersionRange[] {
+  const rangeStrs = requirementStr.split('||').map((part) => part.trim());
+  if (rangeStrs.length === 0) {
+    return DEFAULT_REQUIREMENT;
   }
-  if (!ver1 && !ver2) {
-    throw new Error('Invalid version specifier in range');
-  }
-  if (!comma) {
-    ver2 = ver1;
-  }
-  if (
-    ver1 &&
-    ver2 &&
-    !(openParen === '[' && closeParen === ']') &&
-    eq(ver1, ver2)
-  ) {
-    throw new Error('Invalid version range');
-  }
-  return {
-    startVersion: ver1 || undefined,
-    endVersion: ver2 || undefined,
-    isStartInclusive: !!ver1 && openParen === '[',
-    isEndInclusive: !!ver2 && closeParen === ']',
-  } as VersionRange;
-}
-
-function parseRange(range: string): VersionRange[] {
-  const versionRanges: VersionRange[] = [];
-
-  // add commas at the ends to simplify parsing logic
-  const searchedRange = ',' + range + ',';
-
-  const rangePartRegExp = /([([])\s*([^()\[\],\s]*)\s*(?:(,)\s*([^()\[\],\s]*)\s*)?([)\]])/g;
-  let m = rangePartRegExp.exec(searchedRange);
-  let idx = 0;
-  while (m) {
-    versionRanges.push(
-      ..._parseBetweenParenthesis(searchedRange.substring(idx, m.index)),
-    );
-    const [openParen, ver1, comma, ver2, closeParen] = [...m.slice(1, 6)];
-    versionRanges.push(
-      _parseParenthesisMatch(openParen, ver1, comma, ver2, closeParen),
-    );
-    idx = m.index + m[0].length;
-    m = rangePartRegExp.exec(searchedRange);
-  }
-  versionRanges.push(..._parseBetweenParenthesis(searchedRange.substring(idx)));
-
-  return versionRanges;
+  return rangeStrs.map(parseRange);
 }
 
 export function validRange(range: string): string | null {
-  if (!range) {
+  if (!range.trim()) {
     return null;
   }
 
   try {
-    return parseRange(range)
-      .map((part) =>
-        [
-          part.startVersion
-            ? (part.isStartInclusive ? '[' : '(') + part.startVersion
-            : '[0.0.0',
-          ',',
-          part.endVersion
-            ? part.endVersion + (part.isEndInclusive ? ']' : ')')
-            : ',)',
-        ].join(''),
-      )
-      .join(' ');
+    return parseRequirement(range)
+      .map((range) => {
+        const parts = [];
+        if (range.startVersion && range.startVersion == range.endVersion) {
+          return '=' + range.startVersion;
+        }
+        if (range.startVersion) {
+          parts.push((range.isStartInclusive ? '>=' : '>') + range.startVersion);
+        }
+        if (range.endVersion) {
+          parts.push((range.isEndInclusive ? '<=' : '<') + range.endVersion);
+        }
+        return parts.length > 0 ? parts.join(',') : '>=v0.0.0';
+      })
+      .join(' || ');
   } catch (err) {
     return null;
   }
@@ -117,7 +122,7 @@ export function satisfies(version: string, range: string): boolean {
   // Throw an exception if the version is invalid.
   parse(version);
 
-  for (const part of parseRange(range)) {
+  for (const part of parseRequirement(range)) {
     if (part.startVersion) {
       const comp = compare(version, part.startVersion);
       if (comp === -1 || (comp === 0 && !part.isStartInclusive)) {
@@ -145,8 +150,8 @@ export function minSatisfying() {
 }
 
 export function intersects(r1: string, r2: string): boolean {
-  const leftRanges = parseRange(r1);
-  const rightRanges = parseRange(r2);
+  const leftRanges = parseRequirement(r1);
+  const rightRanges = parseRequirement(r2);
 
   for (const leftRange of leftRanges) {
     for (const rightRange of rightRanges) {
