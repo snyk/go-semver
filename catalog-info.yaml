@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "go-semver"
+  labels:
+    snyk.io/businessCriticality: medium
+    snyk.io/visibility: private
+    snyk.io/metadata-version: "2021-14-10"
+spec:
+  type: service
+  lifecycle: production
+  owner: "@snyk/flow"
