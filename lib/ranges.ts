@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { isValid, parse } from './go/semver';
 import { compare } from './comparison';
 
@@ -18,10 +17,10 @@ const DEFAULT_REQUIREMENT: VersionRange[] = [
 
 type Op = '>=' | '<=' | '>' | '<' | '=';
 const OPS = ['>=', '<=', '>', '<', '='];
+const OPS_RE = `^(${OPS.join('|')})?(.*)$`;
 
 function parsePart(part: string): { op: Op; version: string } {
-  const OPS_RE = OPS.map((op) => _.escapeRegExp(op)).join('|');
-  const match = part.trim().match(`^(${OPS_RE})?(.*)$`);
+  const match = part.trim().match(OPS_RE);
   if (!match) {
     throw new InvalidRequirementPart();
   }
