@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "incremental": true,
-    "target": "es2018",
+    "target": "es2019",
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
@@ -12,10 +12,6 @@
     "noUnusedLocals": true,
     "noImplicitReturns": true
   },
-  "exclude": [
-    "node_modules"
-  ],
-  "include": [
-    "lib/**/*"
-  ]
+  "exclude": ["node_modules"],
+  "include": ["lib/**/*"]
 }
