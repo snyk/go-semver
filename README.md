@@ -1,9 +1,8 @@
 [![Snyk logo](https://snyk.io/style/asset/logo/snyk-print.svg)](https://snyk.io)
 
-[![Build Status](https://travis-ci.org/Snyk/go-semver.svg?branch=master)](https://travis-ci.org/Snyk/go-semver)
 [![Known Vulnerabilities](https://snyk.io/test/github/snyk/go-semver/badge.svg)](https://snyk.io/test/github/snyk/go-semver)
 
-***
+---
 
 # go-semver
 
