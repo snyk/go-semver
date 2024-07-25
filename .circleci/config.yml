@@ -15,7 +15,7 @@ jobs:
           command: npm install
       - prodsec/security_scans:
           mode: auto
-          release-branch: master
+          release-branch: main
           open-source-additional-arguments: --exclude=test
           iac-scan: disabled
   test:
@@ -58,7 +58,7 @@ workflows:
           filters:
             branches:
               ignore:
-                - master
+                - main
       - security-scans:
           name: Security Scans
           context:
@@ -74,4 +74,4 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
