@@ -61,7 +61,7 @@ workflows:
       - security-scans:
           name: Security Scans
           context:
-            - open_source-managed
+            - open-source_analysis-platform
             - nodejs-lib-release
       - test:
           name: Test
