@@ -53,7 +53,6 @@ workflows:
           name: Scan repository for secrets
           context:
             - snyk-bot-slack
-          channel: snyk-vuln-alerts-sca
           filters:
             branches:
               ignore:
@@ -61,7 +60,7 @@ workflows:
       - security-scans:
           name: Security Scans
           context:
-            - open-source_analysis-platform
+            - open_source-managed
             - nodejs-lib-release
       - test:
           name: Test
