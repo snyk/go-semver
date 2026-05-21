@@ -4,8 +4,8 @@ metadata:
   name: go-semver
   annotations:
     github.com/project-slug: snyk/go-semver
-    github.com/team-slug: snyk/os-managed
+    github.com/team-slug: snyk/open-source_composition-analysis
 spec:
   type: internal-library
   lifecycle: "-"
-  owner: os-managed
+  owner: open-source_composition-analysis
