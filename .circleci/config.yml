@@ -58,7 +58,7 @@ workflows:
           filters:
             branches:
               ignore:
-                - master
+                - main
 
       - security-scans:
           name: Security Scans
