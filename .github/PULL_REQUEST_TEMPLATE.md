@@ -1,6 +1,6 @@
-- [ ] Tests written and linted [ℹ︎](https://github.com/snyk/general/wiki/Tests)
-- [ ] Documentation written [ℹ︎](https://github.com/snyk/general/wiki/Documentation)
-- [ ] Commit history is tidy [ℹ︎](https://github.com/snyk/general/wiki/Git)
+- [ ] Tests written and linted
+- [ ] Documentation written
+- [ ] Commit history is tidy and follows Conventional Commits
 
 ### What this does
 
@@ -9,11 +9,6 @@ _Explain why this PR exists_
 ### Notes for the reviewer
 
 _Instructions on how to run this locally, background context, what to review, questions…_
-
-### More information
-
-- [Jira ticket SC-0000](https://snyksec.atlassian.net/browse/SC-0000)
-- [Link to documentation](https://github.com/Snyk/registry/wiki/)
 
 ### Screenshots
 

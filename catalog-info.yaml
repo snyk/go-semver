@@ -6,6 +6,6 @@ metadata:
     github.com/project-slug: snyk/go-semver
     github.com/team-slug: snyk/open-source_composition-analysis
 spec:
-  type: internal-library
-  lifecycle: "-"
+  type: library
+  lifecycle: production
   owner: open-source_composition-analysis
