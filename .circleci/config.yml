@@ -3,29 +3,34 @@ version: 2.1
 orbs:
   prodsec: snyk/prodsec-orb@1
 
+defaults: &defaults
+  resource_class: small
+  docker:
+    - image: cimg/node:24.16
+
+commands:
+  install_deps:
+    description: Install dependencies
+    steps:
+      - run:
+          name: Install dependencies
+          command: npm install
+
 jobs:
   security-scans:
-    resource_class: small
-    docker:
-      - image: cimg/node:14.19
+    <<: *defaults
     steps:
       - checkout
-      - run:
-          name: Install
-          command: npm install
+      - install_deps
       - prodsec/security_scans:
           mode: auto
           open-source-additional-arguments: --exclude=test
           iac-scan: disabled
   test:
-    docker:
-      - image: cimg/node:14.19
-    working_directory: ~/work
+    <<: *defaults
     steps:
       - checkout
-      - run:
-          name: Install
-          command: npm install
+      - install_deps
       - run:
           name: Lint
           command: npm run lint
@@ -33,21 +38,18 @@ jobs:
           name: Test
           command: npm test
   release:
-    docker:
-      - image: cimg/node:14.19
-    working_directory: ~/work
+    <<: *defaults
     steps:
       - checkout
-      - run:
-          name: Install
-          command: npm install
+      - install_deps
       - run:
           name: Release
-          command: npx semantic-release@17
+          command: |
+            export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
+            npx semantic-release@25.0.3
 
 workflows:
-  version: 2
-  test:
+  CICD:
     jobs:
       - prodsec/secrets-scan:
           name: Scan repository for secrets
@@ -57,18 +59,23 @@ workflows:
             branches:
               ignore:
                 - master
+
       - security-scans:
           name: Security Scans
           context:
             - open_source-managed
-            - nodejs-lib-release
+            - nodejs-install
+
       - test:
           name: Test
+
       - release:
           name: Release
+          context:
+            - nodejs-install
+            - github-release
           requires:
             - Test
-          context: nodejs-lib-release
           filters:
             branches:
               only:
