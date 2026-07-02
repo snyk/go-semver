@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": "./lib",
     "incremental": true,
-    "target": "es2019",
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo",
+    "target": "es2023",
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
