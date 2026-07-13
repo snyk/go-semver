@@ -17,3 +17,6 @@ This also supports additional syntax for defining version ranges, as well as log
     >=v0.0.0
     >=v0.0.0, <v1.0.0
     <=v1.0.0 || >= 3.0.0
+
+## Contributing
+This repository is closed to public contributions.
