@@ -4,8 +4,8 @@ metadata:
   name: go-semver
   annotations:
     github.com/project-slug: snyk/go-semver
-    github.com/team-slug: snyk/open-source_composition-analysis
+    github.com/team-slug: snyk/engines_sca-scanners
 spec:
   type: internal-library
   lifecycle: "-"
-  owner: open-source_composition-analysis
+  owner: engines_sca-scanners
