@@ -3,8 +3,8 @@
   "description": "node-semver compatible API with Go modules dependencies semantics",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-    "publishConfig": {
-    "access": "restricted"
+  "publishConfig": {
+    "access": "public"
   },
   "homepage": "https://github.com/snyk/go-semver#readme",
   "repository": {
