@@ -162,9 +162,9 @@ export function intersects(r1: string, r2: string): boolean {
 
   for (const leftRange of leftRanges) {
     for (const rightRange of rightRanges) {
-      if (
-        !(isBefore(leftRange, rightRange) || isBefore(rightRange, leftRange))
-      ) {
+      if (!(
+        isBefore(leftRange, rightRange) || isBefore(rightRange, leftRange)
+      )) {
         return true;
       }
     }
